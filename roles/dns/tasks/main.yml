@@ -1,0 +1,24 @@
+- name: Install bind software
+  apt:
+    name: bind9
+    state: present
+
+- name: Config
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    owner: "root"
+    group: "bind"
+    mode: "0640"
+  loop:
+    - { src: "db.linux98.com.j2", dest: "/etc/bind/db.linux98.com" }
+    - { src: "named.conf.local.j2", dest: "/etc/bind/named.conf.local" }
+    - { src: "named.conf.options.j2", dest: "/etc/bind/named.conf.options" }
+  notify: Restart named service
+
+- name: systemd
+  systemd:
+    name: named
+    state: started
+    enabled: yes
+

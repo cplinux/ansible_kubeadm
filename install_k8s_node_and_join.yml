@@ -1,0 +1,35 @@
+- name: Kubeadm Node Install Packages
+  hosts: k8s-node
+  roles:
+    - dns_client
+    - apt-source
+    - docker
+    - k8s-pre
+    - k8s-node
+
+- name: Get Kubeadm Join CMD
+  hosts: 192.168.31.11
+  tasks:
+    - name: Get Facts
+      shell: "kubeadm token create --print-join-command"
+      register: kubejoin
+
+    - set_fact:
+        kubejoin_cmd: "{{ kubejoin.stdout }}"
+        cacheable: yes
+
+    - name: Print CMD result
+      debug: var=kubejoin_cmd
+
+- name: Kubeadm Node Join Master
+  hosts: k8s-node
+  tasks:
+    - name: Print Other Host Vars
+      debug: var=hostvars['192.168.31.11']['kubejoin_cmd']
+
+    - name: Use kubejoin_cmd to shell
+      shell: "{{ hostvars['192.168.31.11']['kubejoin_cmd'] }}"
+      register: result
+
+    - name: Print('result')
+      debug: var=result.stdout

@@ -1,0 +1,17 @@
+[Unit]
+Description=Harbor
+After=docker.service systemd-networkd.service systemd-resolved.service
+Requires=docker.service
+Documentation=http://github.com/vmware/harbor
+
+[Service]
+Type=simple
+Restart=on-failure
+RestartSec=5
+#需要注意harbor的安装位置
+ExecStart=/usr/bin/docker-compose -f /usr/local/harbor/docker-compose.yml up
+ExecStop=/usr/bin/docker-compose -f /usr/local/harbor/docker-compose.yml down
+
+[Install]
+WantedBy=multi-user.target
+

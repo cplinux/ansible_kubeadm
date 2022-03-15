@@ -1,0 +1,14 @@
+- name: Install kubeadm version {{ kube_version }}
+  apt:
+    name: "{{ item }}"
+    update_cache: yes
+  loop:
+    - kubectl={{ kube_version }}-00
+    - kubelet={{ kube_version }}-00
+    - kubeadm={{ kube_version }}-00
+
+- name: Start Kubelet
+  systemd:
+    name: kubelet
+    state: started
+    enabled: yes

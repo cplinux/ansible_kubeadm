@@ -1,0 +1,7 @@
+- name: test22
+  hosts: all
+  tasks:
+    - name: Test vars {{ dns_server_ip  }}
+      shell: "echo '1234' \
+              echo '4567' \
+              echo '7890'"

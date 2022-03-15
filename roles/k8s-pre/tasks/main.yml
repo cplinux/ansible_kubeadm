@@ -1,0 +1,52 @@
+- name: Off swap
+  shell: "swapoff -a"
+
+- name: Remove swap from /etc/fstab
+  mount:
+    src: /swap.img
+    path: none
+    fstype: swap
+    backup: yes
+    state: absent
+
+- name: Load modules
+  modprobe:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - br_netfilter
+    - overlay
+
+- name: Set modeules with os start
+  copy:
+    src: "k8s-modules.conf"
+    dest: "/etc/modules-load.d/k8s-modules.conf"
+
+- name: Config Kernel sysctl
+  sysctl:
+    name: "{{ item.name }}"
+    value: "{{ item.value }}"
+    sysctl_file: /etc/sysctl.d/k8s-sysctl.conf
+    reload: yes
+  loop:
+    - { name: "vm.swappiness", value: 0 }
+    - { name: "net.bridge.bridge-nf-call-ip6tables", value: 1 }
+    - { name: "net.bridge.bridge-nf-call-iptables", value: 1 }
+    - { name: "net.ipv4.ip_forward", value: 1 }
+
+- name: Install Kube source
+  apt:
+    name: apt-transport-https
+    update_cache: yes
+    state: present
+
+- name: Install K8S Repo Key
+  apt_key:
+    url: https://mirrors.aliyun.com/kubernetes/apt/doc/apt-key.gpg
+    state: present
+
+- name: Add kubernetes apt source list
+  apt_repository:
+    repo: deb http://192.168.31.202:8081/repository/aliyun-apt-k8s/ kubernetes-xenial main
+    state: present
+    filename: kubernetes.list

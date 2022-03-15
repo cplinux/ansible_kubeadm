@@ -1,0 +1,9 @@
+network:
+  version: 2
+  ethernets:
+    eth0:
+      addresses: [{{ ansible_default_ipv4.address }}/24]
+      gateway4: 192.168.31.1
+      nameservers:
+        search: [{{ search_domain }}]
+        addresses: [{{ dns_server_ip }}]

@@ -1,0 +1,18 @@
+$TTL 600
+linux98.com. IN SOA ns.linux98.com. qq.linux98.com. (
+    2022031409
+    10800
+    900
+    604800
+    86400
+)
+
+
+linux98.com. IN NS ns1.linux98.com.
+
+ns1.linux98.com. IN A {{ dns_server_ip }}
+
+{% for host in groups.all %}
+{{ hostvars[host].ansible_hostname }}.linux98.com. IN A {{ hostvars[host].ansible_default_ipv4.address }}
+{% endfor %}
+

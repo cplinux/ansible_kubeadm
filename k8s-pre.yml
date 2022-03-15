@@ -1,0 +1,4 @@
+- hosts:
+    - k8sNode
+  roles:
+    - k8s-pre

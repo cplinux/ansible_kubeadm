@@ -1,0 +1,19 @@
+;
+; BIND data file for local xxx.linux98.com
+;
+$TTL    604800
+@       IN      SOA     linux98.com. root.linux98.com. (
+                       20220314         ; Serial
+                         604800         ; Refresh
+                          86400         ; Retry
+                        2419200         ; Expire
+                         604800 )       ; Negative Cache TTL
+;
+@       IN      NS      ns.linux98.com.
+@       IN      A       {{ dns_server_ip }}
+ns      IN      A       {{ dns_server_ip }}
+
+{% for host in groups.all %}
+{{ hostvars[host].ansible_hostname }}.linux98.com.	IN	A	{{ hostvars[host].ansible_default_ipv4.address }}
+{% endfor %}
+

@@ -1,0 +1,99 @@
+- name: Install kubeadm version {{ kube_version }}
+  apt:
+    name: "{{ item }}"
+    update_cache: yes
+  loop:
+    - kubectl={{ kube_version }}-00
+    - kubelet={{ kube_version }}-00
+    - kubeadm={{ kube_version }}-00
+
+- name: Kubeadm Master01 Init
+  shell: "kubeadm init --kubernetes-version={{ kube_version }} \
+   --apiserver-advertise-address={{ kube_master_ip }} \
+   --control-plane-endpoint={{ kube_vip }} \
+   --apiserver-bind-port=6443 \
+   --image-repository={{ kube_harbor }} \
+   --service-cidr=10.96.0.0/12 \
+   --pod-network-cidr=10.244.0.0/16 "
+  when: ansible_hostname == "master01"
+
+- name: Master01 Authorization User (1/2)
+  file:
+    path: "/root/.kube"
+    state: directory
+    mode: "0755"
+  when: ansible_hostname == "master01"
+
+- name: Master01 Authorization User (2/2)
+  copy:
+    src: "/etc/kubernetes/admin.conf"
+    dest: "/root/.kube/config"
+    owner: "root"
+    group: "root"
+    mode: "0600"
+    remote_src: "yes" 
+  when: ansible_hostname == "master01"
+
+- name: scheduler
+  lineinfile:
+    path: "/etc/kubernetes/manifests/kube-scheduler.yaml"
+    regexp: "port=0"
+    line: "# - --port=0"
+  when: ansible_hostname == "master01"
+
+- name: mkdir flannel dir
+  file:
+    path: "/etc/kubernetes/flannel"
+    state: directory
+    mode: "0755"
+  when: ansible_hostname == "master01"
+
+- name: flannel copy
+  copy:
+    src: "kube-flannel.yml"
+    dest: "/etc/kubernetes/flannel/kube-flannel.yml"
+  when: ansible_hostname == "master01"
+
+- name: apply flannel
+  shell: "kubectl apply -f /etc/kubernetes/flannel/kube-flannel.yml"
+  when: ansible_hostname == "master01"
+
+- name: Get Join Command
+  shell: "kubeadm token create --print-join-command"
+  register: kubejoin
+  when: ansible_hostname == "master01"
+
+- name: Get Join Certificate Key
+  shell: "kubeadm init phase upload-certs --upload-certs |tr -s '\r\n' '%' | cut -d'%' -f3"
+  register: certkey
+  when: ansible_hostname == "master01"
+
+- set_fact:
+    kubejoin_cmd: "{{ kubejoin['stdout'] }}"
+    certkey_key: "{{ certkey['stdout'] }}"
+    cacheable: yes
+  when: ansible_hostname == "master01"
+
+- debug: var=kubejoin
+    # - var=certkey
+
+- name: Other Master join
+  shell: "{{ hostvars['192.168.31.11']['kubejoin_cmd'] }} --control-plane --certificate-key {{ hostvars['192.168.31.11']['certkey_key'] }}"
+  when: ansible_hostname != "master01"
+  
+- name: Other Master Authorization User (1/2)
+  file:
+    path: "/root/.kube"
+    state: directory
+    mode: "0755"
+  when: ansible_hostname != "master01"
+
+- name: Other Master Authorization User (2/2)
+  copy:
+    src: "/etc/kubernetes/admin.conf"
+    dest: "/root/.kube/config"
+    owner: "root"
+    group: "root"
+    mode: "0600"
+    remote_src: "yes" 
+  when: ansible_hostname != "master01"

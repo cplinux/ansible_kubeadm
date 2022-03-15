@@ -1,0 +1,7 @@
+- hosts: k8s-master
+  roles:
+    - dns_client
+    - apt-source
+    - docker
+    - k8s-pre
+    - k8s-master

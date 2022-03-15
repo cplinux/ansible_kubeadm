@@ -1,0 +1,12 @@
+- name: Config Network yaml 
+  template:
+    src: "00-installer-config.yaml.j2"
+    dest: "/etc/netplan/00-installer-config.yaml"
+    owner: "root"
+    group: "root"
+    mode: "0644"
+  when: ( ansible_hostname is not match ("dns*") )
+
+- name: Apply network
+  shell: "netplan apply"
+  when: ( ansible_hostname is not match ("dns*") )

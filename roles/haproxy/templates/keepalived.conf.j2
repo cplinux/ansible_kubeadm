@@ -1,0 +1,32 @@
+global_defs {
+    router_id {{ ansible_hostname }}
+}
+
+vrrp_script chk_haproxy {
+    script "/etc/keepalived/check_haproxy.sh"
+    interval 2
+    weight 2
+}
+
+vrrp_instance VI_1 {
+
+{% if ansible_hostname == "ha01" %}
+    state MASTER
+    priority 200
+{% elif ansible_hostname == "ha02" %}
+    state BACKUP
+    priority 150
+{% endif %}
+
+    interface eth0
+    virtual_router_id 50
+    advert_int 3
+    authentication {
+        auth_type PASS
+        auth_pass 1111
+ }
+    virtual_ipaddress {
+        {{ kube_vip }} dev eth0 label eth0:1
+    }
+}
+

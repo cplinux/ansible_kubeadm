@@ -1,0 +1,32 @@
+- name: Install Soft
+  apt:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - keepalived
+    - haproxy
+
+- name: Set Keepalived Config
+  template:
+    src: "keepalived.conf.j2"
+    dest: "/etc/keepalived/keepalived.conf"
+
+- name: Set Keepalived Check
+  template:
+    src: "check_haproxy.sh.j2"
+    dest: "/etc/keepalived/check_haproxy.sh"
+
+- name: Set Haproxy Config
+  template:
+    src: "haproxy.cfg.j2"
+    dest: "/etc/haproxy/haproxy.cfg"
+
+- name: Restart Service
+  systemd:
+    name: "{{ item }}"
+    daemon_reload: yes
+    state: restarted
+  loop:
+    - keepalived
+    - haproxy
+  ignore_errors: yes

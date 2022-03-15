@@ -1,0 +1,48 @@
+hostname: harbor.linux98.com
+
+http:
+  port: 80
+
+https:
+  port: 443
+  certificate: /usr/local/harbor/cert/6442545_harbor.linux98.com 
+  private_key: /usr/local/harbor/cert/6442545_harbor.linux98.com.key
+
+harbor_admin_password: 123456
+
+database:
+  password: root123
+  max_idle_conns: 100
+  max_open_conns: 900
+
+data_volume: /data/harbor
+trivy:
+  ignore_unfixed: false
+  skip_update: false
+  insecure: false
+
+jobservice:
+  max_job_workers: 10
+
+notification:
+  webhook_job_max_retry: 10
+
+chart:
+  absolute_url: disabled
+
+log:
+  level: info
+  local:
+    rotate_count: 50
+    rotate_size: 200M
+    location: /var/log/harbor
+_version: 2.3.2
+
+proxy:
+  http_proxy:
+  https_proxy:
+  no_proxy:
+  components:
+    - core
+    - jobservice
+    - trivy

@@ -1,0 +1,50 @@
+- name: Install Docker Compose
+  apt:
+    name: docker-compose
+    state: present
+    update_cache: yes
+
+- name: Download harbor-offline-install.tgz
+  unarchive:
+    src: "harbor-offline-installer-v2.3.2.tgz"
+    dest: "/usr/local/"
+    copy: yes
+
+- name: Load Images
+  shell: "/usr/bin/docker load < /usr/local/harbor/harbor.v2.3.2.tar.gz"
+
+- name: Copy Config Yml
+  copy:
+    src: "harbor.yml.j2"
+    dest: "/usr/local/harbor/harbor.yml"
+
+- name: Create cert dir
+  file:
+    path: "/usr/local/harbor/cert/"
+    state: directory
+
+- name: Copy Cert file
+  copy:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+  loop:
+    - { src: "6442545_harbor.linux98.com.pem", dest: "/usr/local/harbor/cert/6442545_harbor.linux98.com" }
+    - { src: "6442545_harbor.linux98.com.key", dest: "/usr/local/harbor/cert/6442545_harbor.linux98.com.key" }
+
+- name: Install harbor
+  shell: "./prepare && ./install.sh"
+  args:
+    chdir: /usr/local/harbor/
+
+- name: Copy Harbor.systemd.service
+  copy:
+    src: "harbor.service.j2"
+    dest: "/lib/systemd/system/harbor.service"
+
+- name: Systemctl reload + enable + start
+  systemd:
+    daemon_reload: yes
+    state: restarted
+    name: harbor
+    enabled: yes
+

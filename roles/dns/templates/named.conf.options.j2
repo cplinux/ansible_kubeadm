@@ -1,0 +1,12 @@
+options {
+  listen-on port 53 { localhost; {{ dns_server_ip }}; };
+  directory "/var/cache/bind";
+  allow-query { any; };
+  allow-query-cache { any; };
+  dnssec-validation auto;
+  allow-transfer { none; };
+
+  recursion yes;
+  allow-recursion { any; };
+};
+

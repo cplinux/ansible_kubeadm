@@ -1,0 +1,18 @@
+# ubuntu repo
+ubuntu_repo_path: http://192.168.31.202:8081/repository/aliyun-apt-proxy/
+
+
+# dns
+dns_server_ip: 192.168.31.201
+search_domain: linux98.com
+
+
+# docker
+registry_mirrors: "https://73yi6cz9.mirror.aliyuncs.com"
+insecure_registries: "harbor.linux98.com"
+
+# k8s master && haproxy
+kube_version: 1.23.4
+kube_vip: 192.168.31.10
+kube_master_ip: 192.168.31.11
+kube_harbor: harbor.linux98.com/google_containers

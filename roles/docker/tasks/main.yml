@@ -1,0 +1,42 @@
+- name: Install Base Soft
+  apt:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - apt-transport-https
+    - ca-certificates
+    - curl
+    - gnupg
+    - lsb-release
+
+- name: Install Docker Repo Key
+  apt_key:
+    url: https://mirrors.aliyun.com/docker-ce/linux/ubuntu/gpg
+    state: present
+
+- name: Install Docker Repo
+  apt_repository:
+    repo: deb [arch=amd64] http://192.168.31.202:8081/repository/aliyun-docker-ce-apt/ focal stable
+    state: present
+
+- name: Install Docker Soft
+  apt:
+    name: "{{ item }}"
+    state: present
+    update_cache: yes
+  loop:
+    - docker-ce
+    - docker-ce-cli
+    - containerd.io
+
+- name: Copy daemon.json
+  template:
+    src: "daemon.json.j2"
+    dest: "/etc/docker/daemon.json"
+
+- name: Restart docker
+  systemd:
+    name: docker
+    daemon_reload: yes
+    state: restarted
+

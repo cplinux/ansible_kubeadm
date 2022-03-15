@@ -1,0 +1,5 @@
+- name: Init Base
+  hosts: harbor
+  roles:
+    - docker
+    - harbor
