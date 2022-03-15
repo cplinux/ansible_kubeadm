@@ -16,3 +16,6 @@ kube_version: 1.23.4
 kube_vip: 192.168.31.10
 kube_master_ip: 192.168.31.11
 kube_harbor: harbor.linux98.com/google_containers
+
+# zabbix
+zabbix_server_ip: 192.168.31.203

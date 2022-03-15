@@ -1,0 +1,11 @@
+- hosts:
+    - dns
+    - nexus
+    - gitlab
+    - jenkins
+    - harbor
+    - lb
+    - k8s-master
+    - k8s-node
+  roles:
+    - zabbix-agent

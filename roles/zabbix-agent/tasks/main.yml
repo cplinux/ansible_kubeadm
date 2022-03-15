@@ -1,0 +1,29 @@
+- name: Install Zabbix Source Deb (1/2)
+  copy:
+    src: "zabbix-release_6.0-1+ubuntu20.04_all.deb"
+    dest: "/tmp/zabbix-release_6.0-1+ubuntu20.04_all.deb"
+
+- name: Install Zabbix Source Deb (2/2)
+  apt:
+    deb: "/tmp/zabbix-release_6.0-1+ubuntu20.04_all.deb"
+
+- name: Install Zabbix Agent
+  apt:
+    name: zabbix-agent
+    state: present
+    update_cache: yes
+
+- name: Config Zabbix Agent
+  template:
+    src: "zabbix_agentd.conf.j2"
+    dest: "/etc/zabbix/zabbix_agentd.conf"
+    owner: "root"
+    group: "root"
+    mode: "0644"
+
+- name: Restart Zabbix Agent Service
+  systemd:
+    name: zabbix-agent
+    state: started
+    enabled: yes
+
